@@ -117,6 +117,13 @@ class GeneticAlgorithm(object):
                 key=attrgetter('fitness'), reverse=self.maximise_fitness)
             return members[0]
 
+
+        def reinsertion(child_1, child_2, population, population_size):
+            population.append(child_1)
+            if len(population) < population_size:
+                population.append(child_2)
+            return population
+
         self.fitness_function = None
         self.tournament_selection = tournament_selection
         self.tournament_size = self.population_size // 10
@@ -124,6 +131,7 @@ class GeneticAlgorithm(object):
         self.create_individual = create_individual
         self.crossover_function = crossover
         self.mutate_function = mutate
+        self.reinsertion = reinsertion
         self.selection_function = self.tournament_selection
 
     def create_initial_population(self):
@@ -198,9 +206,8 @@ class GeneticAlgorithm(object):
                 self.mutate_function(child_1.genes)
                 self.mutate_function(child_2.genes)
 
-            new_population.append(child_1)
-            if len(new_population) < self.population_size:
-                new_population.append(child_2)
+            new_population = self.reinsertion(
+                child_1, child_2, new_population, self.population_size)
 
         if self.elitism:
             new_population[0] = elite
